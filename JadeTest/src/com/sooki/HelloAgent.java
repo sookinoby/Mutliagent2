@@ -19,7 +19,7 @@ import jade.lang.acl.ACLMessage;
 
 public class HelloAgent extends Agent {
 	boolean first = true;
-	int numberScored;
+	int numberScored = 0;
 	int n=16;
 	//Memory memory;
 	Random generator;
@@ -27,7 +27,8 @@ public class HelloAgent extends Agent {
 	LimitedMemory secondary;
 	ACLMessage msg ;
 	AID r;
-	
+	int numberOfMovesMade = 0 ;
+
 	protected void setup() {
 		addBehaviour(new myBehaviour(this));
 		Environment.initialise();
@@ -40,7 +41,7 @@ public class HelloAgent extends Agent {
 		primary = new LimitedMemory();
 		secondary = new LimitedMemory();
 		generator = new Random();
-		generator.setSeed(0);
+		generator.setSeed(1);
 	}
 
 	class myBehaviour extends SimpleBehaviour {
@@ -67,17 +68,50 @@ public class HelloAgent extends Agent {
 			return true;
 		}
 		
+		public String constructTruthMessage(int pos1,int val1,int pos2,int val2)
+		{
+			StringBuilder br = new StringBuilder();
+			br.append(pos1 + "=" + val1 + ";" + pos2 + "=" + val2);
+			return br.toString();
+			
+		}
+		
+		public String construtFalseMessage(int pos1,int val1,int pos2,int val2)
+		{
+			StringBuilder br = new StringBuilder();
+			int random1 = generator.nextInt(n);
+			int random2 = generator.nextInt(n);
+			br.append(pos1 + "=" + random1 + ";" + pos2 + "=" + random2);
+			return br.toString();
+			
+		}
+		
+		
 		public boolean makeMove(int a, int b) {
 			int re[] = Environment.seeCard(a, b);
 			if (re[0] == re[1]) {
 				primary.remove(a, re[0]);
 				primary.remove(b, re[1]);
+				numberScored++;
+				numberOfMovesMade++;
+			
 				return true;
 			} else {
 				System.out.println("");
 				System.out.println("The value was" + re[0] + "," + re[1]);
 				primary.add(a, re[0]);
 				primary.add(b, re[1]);
+				
+				float prob = generator.nextFloat();
+				numberOfMovesMade++;
+				if(prob > 0.5)
+				{
+					msg.setContent(constructTruthMessage(a, re[0],b, re[0]));
+				}
+				else {
+					msg.setContent(construtFalseMessage(a, re[0],b, re[0]));
+				}
+				
 				return false;
 			}
 		}
@@ -163,7 +197,7 @@ public class HelloAgent extends Agent {
 					makeMove(moves[0] ,moves[1]);
 				//	System.out.println(memory);
 				}
-				System.out.println(cur.getLocalName() + " is done playing  the game");
+				System.out.println(cur.getLocalName() + " is done playing  the game " + numberScored + "Moves made " +  numberOfMovesMade);
 				
 			
 	
@@ -175,7 +209,7 @@ public class HelloAgent extends Agent {
 			{
 			playGame();
 			first = false;
-			Helper.delay(2000);
+			Helper.delay(1000);
 			send(msg);
 			}
 			else {
@@ -183,7 +217,7 @@ public class HelloAgent extends Agent {
 			if(recieved != null)
 			{
 				playGame();
-				Helper.delay(2000);
+				Helper.delay(1000);
 				send(msg);
 				
 			}

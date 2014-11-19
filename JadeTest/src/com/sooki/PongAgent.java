@@ -37,14 +37,28 @@ public class PongAgent extends Agent {
 		
 		}
 		
+		public void analyzeMessage(String content)
+		{
+			String posval [] = content.split(";");
+			String me1[] = posval[0].split("=");
+			String me2[] =  posval[1].split("=");
+			
+			int pos1 = Integer.parseInt(me1[0]);
+			int pos2 = Integer.parseInt(me2[0]);
+			int mem1 = Integer.parseInt(me1[1]);
+			int mem2 = Integer.parseInt(me1[1]);
+			
+			System.out.println(pos1 + "=" + mem1 + ";" + pos2 + "=" + mem2 );
+		}
+		
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			ACLMessage recieved = blockingReceive();
 			if(recieved != null)
 			{
-				System.out.println(cur.getLocalName() + " like sucks turn");  
-				Helper.delay(2000);
+				System.out.print(cur.getLocalName() + " "); analyzeMessage(recieved.getContent() );  
+				Helper.delay(1000);
 				send(msg);
                 
                

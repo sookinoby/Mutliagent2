@@ -16,13 +16,14 @@ public class HelloAgent extends Agent {
 	int n=16;
 	Memory memory;
 	Random generator;
-	
+	LimitedMemory primary;
+	LimitedMemory secondary;
 	protected void setup() {
 		addBehaviour(new myBehaviour(this));
 		Environment.initialise();
 	//	memory = new Memory();
-		LimitedMemory primary = new LimitedMemory();
-		LimitedMemory secondary = new LimitedMemory();
+		primary = new LimitedMemory();
+		secondary = new LimitedMemory();
 		generator = new Random();
 		generator.setSeed(0);
 	}
@@ -54,8 +55,7 @@ public class HelloAgent extends Agent {
 		public boolean makeMove(int a, int b) {
 			int re[] = Environment.seeCard(a, b);
 			if (re[0] == re[1]) {
-				System.out.println("");
-				System.out.println("The value was" + re[0] + "," + re[1]);
+				primary.remove(a, re[0]);
 				memory.erase(a, b);
 				return true;
 			} else {

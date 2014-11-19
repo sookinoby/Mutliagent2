@@ -6,21 +6,36 @@ import java.util.Random;
 import com.sooki.environment.BoardState;
 import com.sooki.environment.Environment;
 import com.sooki.memory.LimitedMemory;
-import com.sooki.utility.Memory;
 
+
+
+
+import com.sooki.utility.Helper;
+
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.*;
+import jade.lang.acl.ACLMessage;
 
 public class HelloAgent extends Agent {
+	boolean first = true;
 	int numberScored;
 	int n=16;
-	Memory memory;
+	//Memory memory;
 	Random generator;
 	LimitedMemory primary;
 	LimitedMemory secondary;
+	ACLMessage msg ;
+	AID r;
+	
 	protected void setup() {
 		addBehaviour(new myBehaviour(this));
 		Environment.initialise();
+		
+		msg = new ACLMessage(ACLMessage.INFORM);
+		r = new AID("fred",AID.ISLOCALNAME);
+		msg.addReceiver(r);
+		
 	//	memory = new Memory();
 		primary = new LimitedMemory();
 		secondary = new LimitedMemory();
@@ -56,12 +71,13 @@ public class HelloAgent extends Agent {
 			int re[] = Environment.seeCard(a, b);
 			if (re[0] == re[1]) {
 				primary.remove(a, re[0]);
-				memory.erase(a, b);
+				primary.remove(b, re[1]);
 				return true;
 			} else {
 				System.out.println("");
 				System.out.println("The value was" + re[0] + "," + re[1]);
-				memory.put(a, b, re[0], re[1]);
+				primary.add(a, re[0]);
+				primary.add(b, re[1]);
 				return false;
 			}
 		}
@@ -89,31 +105,9 @@ public class HelloAgent extends Agent {
 		
 		public int [] successMovesAvailable(ArrayList<Integer>  possible)
 		{
-			int memArray [] = memory.getMemory();
+		//	int memArray [] = memory.getMemory();
 			int moves[] = new int [2];
-			moves[0] = -1;
-			moves[1] = -1;
-			for(int i=0;i<n;i++)
-			{
-				if(memArray[i]!=-1)
-				{
-					int x = memArray[i];
-					for (int j=i+1;j<n;j++)
-					{
-						if(memArray[j] == x)
-						{
-							if(possible.contains(i) && possible.contains(j))
-							{
-								moves[0] = i;
-								moves[1] = j;
-								return moves;
-							}
-						
-							memory.erase(moves[0], moves[1]);
-						}
-					}
-				}
-			}
+			moves = primary.matchingEntrySameMemory();
 			return moves;
 			
 		}
@@ -126,7 +120,7 @@ public class HelloAgent extends Agent {
 		}
 		public int [] generateRandom(ArrayList<Integer>  possible)
 		{
-			
+				
 			    int moves[] = new int[2];
 			    moves[0] = -1;
 				moves[1] = -1;
@@ -144,11 +138,11 @@ public class HelloAgent extends Agent {
 						
 			
 		}
-
-		public void action() {
-
 		
-			if (isTokenObtained()) {
+		public void playGame()
+		{
+			System.out.println(cur.getLocalName() + " is playing the game");
+		
 				BoardState  b = percept();
 				ArrayList<Integer>  possible =  possibleMoves(b);
 				b.printBoardState();
@@ -167,12 +161,33 @@ public class HelloAgent extends Agent {
 				else {
 					System.out.println("The move made " + moves[0] + " "+ moves[1]);
 					makeMove(moves[0] ,moves[1]);
-					System.out.println(memory);
+				//	System.out.println(memory);
 				}
+				System.out.println(cur.getLocalName() + " is done playing  the game");
 				
-				passTheToken();
+			
+	
+		}
+
+		public void action() {
+
+			if(first)	
+			{
+			playGame();
+			first = false;
+			Helper.delay(2000);
+			send(msg);
 			}
-			block(2000);
+			else {
+			ACLMessage recieved = blockingReceive();
+			if(recieved != null)
+			{
+				playGame();
+				Helper.delay(2000);
+				send(msg);
+				
+			}
+			}
 			
 		}
 

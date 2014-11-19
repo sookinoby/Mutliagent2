@@ -30,8 +30,9 @@ public class LimitedMemory {
 	{
 		Cell one = findMatchingCell(pos1);
 		Cell two = findMatchingCell(pos2);
-		
+		if(one != null)
 		mem.remove(one);
+		if(two != null)
 		mem.remove(two);
 		
 			
@@ -120,6 +121,9 @@ public class LimitedMemory {
 		
 		return pos;
 	}
+	
+
+	
 	
 	@Override
 	public String toString() {

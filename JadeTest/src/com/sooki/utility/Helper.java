@@ -27,4 +27,13 @@ public class Helper {
 		return number;
 		
 	}
+	public static void delay(int delay)
+	{
+	try {
+		Thread.sleep(delay);
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	}
 }

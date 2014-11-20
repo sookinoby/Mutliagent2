@@ -28,7 +28,7 @@ public class HelloAgent extends Agent {
 	ACLMessage msg ;
 	AID r;
 	int numberOfMovesMade = 0 ;
-
+	int lieCount = 3;
 	protected void setup() {
 		addBehaviour(new myBehaviour(this));
 		Environment.initialise();
@@ -84,6 +84,28 @@ public class HelloAgent extends Agent {
 			br.append(pos1 + "=" + random1 + ";" + pos2 + "=" + random2);
 			return br.toString();
 			
+		}
+		
+		public boolean analyzeMessage(String content)
+		{
+			String posval [] = content.split(";");
+			String me1[] = posval[0].split("=");
+			String me2[] =  posval[1].split("=");
+			
+			int pos1 = Integer.parseInt(me1[0]);
+			int pos2 = Integer.parseInt(me2[0]);
+			int mem1 = Integer.parseInt(me1[1]);
+			int mem2 = Integer.parseInt(me1[1]);
+			
+			secondary.add(pos1, mem1);
+			secondary.add(pos2, mem2);
+			boolean isfaking= primary.isFaking(secondary);
+			if(isfaking)
+			{
+				primary.removeBadMemory(secondary);
+				System.out.println( getLocalName() + " Says: Other agent lied to me");
+			}
+			return isfaking;
 		}
 		
 		
@@ -146,6 +168,15 @@ public class HelloAgent extends Agent {
 			
 		}
 		
+		public int [] possibleSucessMovesAvailable(ArrayList<Integer>  possible)
+		{
+		//	int memArray [] = memory.getMemory();
+			int moves[] = new int [2];
+			moves = primary.matchingEntryMixed(secondary);
+			return moves;
+			
+		}
+		
 		public void printPossible(ArrayList<Integer>  possible ) {
 			for(Integer q : possible)
 			{
@@ -173,7 +204,7 @@ public class HelloAgent extends Agent {
 			
 		}
 		
-		public void playGame()
+		public void playGame(boolean faking)
 		{
 			System.out.println(cur.getLocalName() + " is playing the game");
 		
@@ -184,6 +215,10 @@ public class HelloAgent extends Agent {
 				int moves[] = successMovesAvailable(possible);
 				if(moves[0] == -1 || moves[1] == -1)
 				{
+					if(faking == false)
+					{
+						
+					}
 					moves = generateRandom(possible);
 				//	System.out.println("No success move was found");
 				}	
@@ -207,7 +242,7 @@ public class HelloAgent extends Agent {
 
 			if(first)	
 			{
-			playGame();
+			playGame(true);
 			first = false;
 			Helper.delay(1000);
 			send(msg);
@@ -216,7 +251,8 @@ public class HelloAgent extends Agent {
 			ACLMessage recieved = blockingReceive();
 			if(recieved != null)
 			{
-				playGame();
+				boolean faking = analyzeMessage(recieved.getContent());
+				playGame(faking);
 				Helper.delay(1000);
 				send(msg);
 				

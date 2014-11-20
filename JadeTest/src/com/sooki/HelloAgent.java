@@ -43,7 +43,7 @@ public class HelloAgent extends Agent {
 		primary = new LimitedMemory();
 		secondary = new LimitedMemory();
 		generator = new Random();
-		generator.setSeed(1);
+		generator.setSeed(0);
 	}
 
 	class myBehaviour extends SimpleBehaviour {
@@ -231,12 +231,12 @@ public class HelloAgent extends Agent {
 						secondaryMemoryUsed = true;
 						
 					}
-					else {
-						if(moves[0] == -1 || moves[1] == -1)
-						{
+					if(moves[0] == -1 || moves[1] == -1)
+					{
 						moves = generateRandom(possible);
-						}
+						secondaryMemoryUsed = true;
 					}
+					
 					
 				//	System.out.println("No success move was found");
 				}	
@@ -248,7 +248,7 @@ public class HelloAgent extends Agent {
 				else {
 					System.out.println("The move made " + moves[0] + " "+ moves[1]);
 					boolean success = makeMove(moves[0] ,moves[1]);
-					if(success = false && faking == false && secondaryMemoryUsed == true)
+					if(success == false && faking == false && secondaryMemoryUsed == true)
 					{
 						currentLie++;
 						secondary.remove(moves[0],moves[1]);

@@ -6,6 +6,8 @@ import java.util.Random;
 
 
 
+
+
 import com.sooki.utility.Helper;
 
 import jade.core.AID;
@@ -57,8 +59,11 @@ public class PongAgent extends Agent {
 			ACLMessage recieved = blockingReceive();
 			if(recieved != null)
 			{
+				System.out.println("----------------" + cur.getLocalName() + " is playing the round" + "----------------");
 				System.out.print(cur.getLocalName() + " "); analyzeMessage(recieved.getContent() );  
 				Helper.delay(1000);
+				System.out.println("----------------"  + cur.getLocalName() + " is done with round" + "----------------" );
+				System.out.println("");
 				send(msg);
                 
                

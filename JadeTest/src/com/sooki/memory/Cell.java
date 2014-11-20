@@ -14,7 +14,7 @@ public class Cell {
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
 		Cell p = (Cell) obj;
-		return this.value == p.value;
+		return this.value == p.value && this.position == p.position ;
 	}
 	
 	public boolean matchingPair(Object obj)

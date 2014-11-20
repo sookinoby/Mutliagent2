@@ -38,6 +38,12 @@ public class LimitedMemory {
 			
 	}
 	
+	public void remove(Cell cel)
+	{
+		this.mem.remove(cel);
+			
+	}
+	
 	public Cell findMatchingCell(int pos1)
 	{
 	
@@ -88,6 +94,8 @@ public class LimitedMemory {
 	public boolean isFaking(LimitedMemory memory2)
 	{
 		boolean fake = false;
+		if(!memory2.mem.isEmpty())
+		{
 		for(Cell ce : mem)
 		{
 			for(Cell pe : memory2.mem)
@@ -98,7 +106,32 @@ public class LimitedMemory {
 				}
 			}
 		}
+		}
 		return fake;
+		
+	}
+	
+	public void removeBadMemory(LimitedMemory memory2)
+	{
+		if(!memory2.mem.isEmpty())
+		{
+		ArrayList<Cell> bad = new ArrayList<>();
+		for(Cell ce : mem)
+		{
+			for(Cell pe : memory2.mem)
+			{
+				if(ce.fakeEntry(pe))
+				{
+				bad.add(pe);
+				}
+			}
+		}
+		if(!bad.isEmpty())
+		{
+		for(Cell qe : bad)
+			memory2.remove(qe);
+		}
+		}
 		
 	}
 	
@@ -137,7 +170,7 @@ public class LimitedMemory {
 	}
 	
 	
-/*	public static void main(String args[])
+	/*public static void main(String args[])
 	{
 		LimitedMemory me = new LimitedMemory();
 		LimitedMemory me2 = new LimitedMemory();
@@ -153,7 +186,7 @@ public class LimitedMemory {
 		Cell cell5 = new Cell(0,0);
 		Cell cell6 = new Cell(1,1);
 		//Cell cell3 = new Cell(2,2);
-		Cell cell7 = new Cell(3,2);
+		Cell cell7 = new Cell(2,2);
 		
 		me2.add(cell5);
 		me2.add(cell6);
@@ -164,6 +197,8 @@ public class LimitedMemory {
 		//int pos2 [] = me.matchingEntryMixed(me2);
 	//	System.out.println(cell1);
 	//	System.out.println(cell2);
-	//	System.out.println(me.isFaking(me2));
+		System.out.println(me.isFaking(me2));
+		me.removeBadMemory(me2);
+		System.out.println(me.isFaking(me2));
 	}*/
 }

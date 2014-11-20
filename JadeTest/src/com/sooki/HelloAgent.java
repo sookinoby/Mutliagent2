@@ -1,6 +1,7 @@
 package com.sooki;
 
 import java.util.ArrayList;
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.Random;
 
 import com.sooki.environment.BoardState;
@@ -28,7 +29,8 @@ public class HelloAgent extends Agent {
 	ACLMessage msg ;
 	AID r;
 	int numberOfMovesMade = 0 ;
-	int lieCount = 3;
+	int maxLieCount = 3;
+	int currentLie = 0;
 	protected void setup() {
 		addBehaviour(new myBehaviour(this));
 		Environment.initialise();
@@ -87,7 +89,9 @@ public class HelloAgent extends Agent {
 		}
 		
 		public boolean analyzeMessage(String content)
-		{
+		{ 
+			boolean isfaking = false;
+			try {
 			String posval [] = content.split(";");
 			String me1[] = posval[0].split("=");
 			String me2[] =  posval[1].split("=");
@@ -99,12 +103,17 @@ public class HelloAgent extends Agent {
 			
 			secondary.add(pos1, mem1);
 			secondary.add(pos2, mem2);
-			boolean isfaking= primary.isFaking(secondary);
+			isfaking = primary.isFaking(secondary);
 			if(isfaking)
 			{
 				primary.removeBadMemory(secondary);
 				System.out.println( getLocalName() + " Says: Other agent lied to me");
 			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Recieved invalid message");
+		}
 			return isfaking;
 		}
 		
@@ -208,6 +217,7 @@ public class HelloAgent extends Agent {
 		{
 			System.out.println(cur.getLocalName() + " is playing the game");
 		
+				boolean secondaryMemoryUsed = false;
 				BoardState  b = percept();
 				ArrayList<Integer>  possible =  possibleMoves(b);
 				b.printBoardState();
@@ -217,9 +227,17 @@ public class HelloAgent extends Agent {
 				{
 					if(faking == false)
 					{
+						moves = possibleSucessMovesAvailable(possible);
+						secondaryMemoryUsed = true;
 						
 					}
-					moves = generateRandom(possible);
+					else {
+						if(moves[0] == -1 || moves[1] == -1)
+						{
+						moves = generateRandom(possible);
+						}
+					}
+					
 				//	System.out.println("No success move was found");
 				}	
 				
@@ -229,7 +247,12 @@ public class HelloAgent extends Agent {
 				}	
 				else {
 					System.out.println("The move made " + moves[0] + " "+ moves[1]);
-					makeMove(moves[0] ,moves[1]);
+					boolean success = makeMove(moves[0] ,moves[1]);
+					if(success = false && faking == false && secondaryMemoryUsed == true)
+					{
+						currentLie++;
+						secondary.remove(moves[0],moves[1]);
+					}
 				//	System.out.println(memory);
 				}
 				System.out.println(cur.getLocalName() + " is done playing  the game " + numberScored + "Moves made " +  numberOfMovesMade);
@@ -252,6 +275,8 @@ public class HelloAgent extends Agent {
 			if(recieved != null)
 			{
 				boolean faking = analyzeMessage(recieved.getContent());
+				if(faking)
+					currentLie++;
 				playGame(faking);
 				Helper.delay(1000);
 				send(msg);
